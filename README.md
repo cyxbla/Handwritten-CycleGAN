@@ -75,9 +75,10 @@ Both generators and discriminators weights will be saved under the output direct
 
 You can also view the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
 
-![Generator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png =500x500)![Discriminator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png =500x500)
-![Generator GAN loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png =50%x)![Generator identity loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_identity.png =500x500)
-![Generator cycle loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_cycle.png =500x500)
+<img Generator Loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png" width="300" height="300"> <img Discriminator loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png" width="300" height="300">
+<img Generator GAN loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png" width="300" height="300">
+<img Generator identity loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_identity.png" width="300" height="300">
+<img Generator cycle loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_cycle.png" height="300" width="300">
 
 
 ## Test
@@ -96,8 +97,8 @@ This command will take the images under the *dataroot/test* directory, run them 
 
 Examples of the generated outputs (default params, horse2zebra dataset):
 
-![Real horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_A.jpg =500x500)![Fake zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_B.png =500x500)
-![Real zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_B.jpg =500x500)![Fake horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_A.png =500x500)
+<img Real horse src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_A.jpg" width="200" height="200"> <img Fake zebra src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_B.png" height="200" width="200"><br>
+<img Real zebra src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_B.jpg" height="200" width="200"><img Fake horse src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_A.png" height="200" width="200">
 
 ## License
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
