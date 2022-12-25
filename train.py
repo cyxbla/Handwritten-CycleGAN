@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import torch
 import torch.nn as nn
+from PIL.Image import Resampling
 
 from models import Generator
 from models import Discriminator
@@ -17,6 +18,8 @@ from utils import LambdaLR
 from utils import Logger
 from utils import weights_init_normal
 from datasets import ImageDataset
+
+# torch.autograd.set_detect_anomaly(True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--epoch', type=int, default=0, help='starting epoch')
@@ -53,10 +56,10 @@ if opt.cuda:
     #netD_B.cuda()
     netD_B.to(torch.device('cuda'))
 
-    netG_A2B = nn.DataParallel(netG_A2B, device_ids=[0, 1, 2])
-    netG_B2A = nn.DataParallel(netG_B2A, device_ids=[0, 1, 2])
-    netD_A = nn.DataParallel(netD_A, device_ids=[0, 1, 2])
-    netD_B = nn.DataParallel(netD_B, device_ids=[0, 1, 2])
+    netG_A2B = nn.DataParallel(netG_A2B, device_ids=[0])
+    netG_B2A = nn.DataParallel(netG_B2A, device_ids=[0])
+    netD_A = nn.DataParallel(netD_A, device_ids=[0])
+    netD_B = nn.DataParallel(netD_B, device_ids=[0])
 
 netG_A2B.apply(weights_init_normal)
 netG_B2A.apply(weights_init_normal)
@@ -93,7 +96,7 @@ fake_A_buffer = ReplayBuffer()
 fake_B_buffer = ReplayBuffer()
 
 # Dataset loader
-transforms_ = [ transforms.Resize(int(opt.size*1.12), Image.BICUBIC), 
+transforms_ = [ transforms.Resize(int(opt.size*1.12), Resampling.BICUBIC), 
                 transforms.RandomCrop(opt.size), 
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),  # 归一化到[0, 1] 维度转换, 例如[128, 128, 1] --> [1, 128, 128]
@@ -147,8 +150,8 @@ for epoch in range(opt.epoch, opt.n_epochs):
         loss_G.backward(retain_graph=True)
         optimizer_G.step()
 
-        loss_G.backward()
-        optimizer_G.step()
+        # loss_G.backward()
+        # optimizer_G.step()
 
         ###################################
 

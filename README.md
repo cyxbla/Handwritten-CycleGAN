@@ -10,27 +10,6 @@ We use CycleGAN to generate handwritten Chinese characters.
 
 ![](./output/B/0059.png)
 
-## Train
-
-```python
-python train.py --cuda --dataroot datasets/lantingkai/ --input_nc 1 --output_nc 1
-```
-
-```python
-python train.py --cuda --dataroot datasets/baotakai/ --input_nc 1 --output_nc 1
-```
-
-## Test
-
-```python
-python test.py --dataroot datasets/lantingkai/ --cuda --input_nc 1 --output_nc 1
-```
-
-```python
-python test.py --dataroot datasets/baotakai/ --cuda --input_nc 1 --output_nc 1
-```
-
-# Original Repository
 
 # Pytorch-CycleGAN
 A clean and readable Pytorch implementation of CycleGAN (https://arxiv.org/abs/1703.10593)
@@ -47,6 +26,36 @@ To plot loss graphs and draw images in a nice web browser view
 pip3 install visdom
 ```
 
+## Train
+If ther's no GPU, don't need to add `--cuda` in command.
+If having multi-GPU, need to add device_id in `./train.py`.
+```python
+train.py
+    line 56 - 59: 
+        netG_A2B = nn.DataParallel(netG_A2B, device_ids=[0])
+        netG_B2A = nn.DataParallel(netG_B2A, device_ids=[0])
+        netD_A = nn.DataParallel(netD_A, device_ids=[0])
+        netD_B = nn.DataParallel(netD_B, device_ids=[0])
+```
+```python
+python3 train.py --cuda --dataroot datasets/lantingkai/ --input_nc 1 --output_nc 1
+```
+
+```python
+python3 train.py --cuda --dataroot datasets/baotakai/ --input_nc 1 --output_nc 1
+```
+
+## Test
+
+```python
+python3 test.py --dataroot datasets/lantingkai/ --cuda --input_nc 1 --output_nc 1
+```
+
+```python
+python3 test.py --dataroot datasets/baotakai/ --cuda --input_nc 1 --output_nc 1
+```
+
+# Original Repository
 ## Training
 ### 1. Setup the dataset
 First, you will need to download and setup a dataset. The easiest way is to use one of the already existing datasets on UC Berkeley's repository:
@@ -71,7 +80,7 @@ Alternatively you can build your own dataset by setting up the following directo
 ```
 ./train --dataroot datasets/<dataset_name>/ --cuda
 ```
-This command will start a training session using the images under the *dataroot/train* directory with the hyperparameters that showed best results according to CycleGAN authors. You are free to change those hyperparameters, see ```./train --help``` for a description of those.
+This command will start a training session using the images under the *dataroot/train* directory with the hyperparameters that showed best results according to CycleGAN authors. You are free to change those hyperparameters, see ```./train.py --help``` for a description of those.
 
 Both generators and discriminators weights will be saved under the output directory.
 
@@ -89,7 +98,7 @@ You can also view the training progress as well as live output images by running
 ```
 ./test --dataroot datasets/<dataset_name>/ --cuda
 ```
-This command will take the images under the *dataroot/test* directory, run them through the generators and save the output under the *output/A* and *output/B* directories. As with train, some parameters like the weights to load, can be tweaked, see ```./test --help``` for more information.
+This command will take the images under the *dataroot/test* directory, run them through the generators and save the output under the *output/A* and *output/B* directories. As with train, some parameters like the weights to load, can be tweaked, see ```./test.py --help``` for more information.
 
 Examples of the generated outputs (default params, horse2zebra dataset):
 
