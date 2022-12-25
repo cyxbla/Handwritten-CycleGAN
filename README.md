@@ -26,37 +26,8 @@ To plot loss graphs and draw images in a nice web browser view
 pip3 install visdom
 ```
 
-## Train
-If ther's no GPU, don't need to add `--cuda` in command.
-If having multi-GPU, need to add device_id in `./train.py`.
-```python
-train.py
-    line 56 - 59: 
-        netG_A2B = nn.DataParallel(netG_A2B, device_ids=[0])
-        netG_B2A = nn.DataParallel(netG_B2A, device_ids=[0])
-        netD_A = nn.DataParallel(netD_A, device_ids=[0])
-        netD_B = nn.DataParallel(netD_B, device_ids=[0])
-```
-```python
-python3 train.py --cuda --dataroot datasets/lantingkai/ --input_nc 1 --output_nc 1
-```
-
-```python
-python3 train.py --cuda --dataroot datasets/baotakai/ --input_nc 1 --output_nc 1
-```
-
-## Test
-
-```python
-python3 test.py --dataroot datasets/lantingkai/ --cuda --input_nc 1 --output_nc 1
-```
-
-```python
-python3 test.py --dataroot datasets/baotakai/ --cuda --input_nc 1 --output_nc 1
-```
-
-# Original Repository
 ## Training
+
 ### 1. Setup the dataset
 First, you will need to download and setup a dataset. The easiest way is to use one of the already existing datasets on UC Berkeley's repository:
 ```
@@ -77,6 +48,24 @@ Alternatively you can build your own dataset by setting up the following directo
     |   |   |   └── B              # Contains domain B images (i.e. Batman)
     
 ### 2. Train!
+If you don't own a GPU remove the --cuda option, although I advise you to get one!
+If you have multi-GPU, you need to add device_id in `./train.py`.
+```python
+train.py
+    line 56 - 59: 
+        netG_A2B = nn.DataParallel(netG_A2B, device_ids=[0])
+        netG_B2A = nn.DataParallel(netG_B2A, device_ids=[0])
+        netD_A = nn.DataParallel(netD_A, device_ids=[0])
+        netD_B = nn.DataParallel(netD_B, device_ids=[0])
+```
+```python
+python3 train.py --cuda --dataroot datasets/lantingkai/ --input_nc 1 --output_nc 1
+```
+
+```python
+python3 train.py --cuda --dataroot datasets/baotakai/ --input_nc 1 --output_nc 1
+```
+
 ```
 ./train --dataroot datasets/<dataset_name>/ --cuda
 ```
@@ -84,17 +73,22 @@ This command will start a training session using the images under the *dataroot/
 
 Both generators and discriminators weights will be saved under the output directory.
 
-If you don't own a GPU remove the --cuda option, although I advise you to get one!
-
 You can also view the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
 
-![Generator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png)
-![Discriminator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png)
-![Generator GAN loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png)
-![Generator identity loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_identity.png)
-![Generator cycle loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_cycle.png)
+![Generator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png =50%x)![Discriminator loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png =50%x)
+![Generator GAN loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png =50%x)![Generator identity loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_identity.png =50%x)
+![Generator cycle loss](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_cycle.png =50%x)
 
-## Testing
+
+## Test
+```python
+python3 test.py --dataroot datasets/lantingkai/ --cuda --input_nc 1 --output_nc 1
+```
+
+```python
+python3 test.py --dataroot datasets/baotakai/ --cuda --input_nc 1 --output_nc 1
+```
+
 ```
 ./test --dataroot datasets/<dataset_name>/ --cuda
 ```
@@ -102,10 +96,8 @@ This command will take the images under the *dataroot/test* directory, run them 
 
 Examples of the generated outputs (default params, horse2zebra dataset):
 
-![Real horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_A.jpg)
-![Fake zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_B.png)
-![Real zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_B.jpg)
-![Fake horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_A.png)
+![Real horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_A.jpg)![Fake zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_B.png)
+![Real zebra](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_B.jpg)![Fake horse](https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_A.png)
 
 ## License
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
