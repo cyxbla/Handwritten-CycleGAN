@@ -22,17 +22,25 @@ from datasets import ImageDataset
 # torch.autograd.set_detect_anomaly(True)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--epoch', type=int, default=0, help='starting epoch')
-parser.add_argument('--n_epochs', type=int, default=200, help='number of epochs of training')
-parser.add_argument('--batchSize', type=int, default=6, help='size of the batches')
-parser.add_argument('--dataroot', type=str, default='datasets/horse2zebra/', help='root directory of the dataset')
-parser.add_argument('--lr', type=float, default=0.0002, help='initial learning rate')
-parser.add_argument('--decay_epoch', type=int, default=100, help='epoch to start linearly decaying the learning rate to 0')
-parser.add_argument('--size', type=int, default=128, help='size of the data crop (squared assumed)')
-parser.add_argument('--input_nc', type=int, default=3, help='number of channels of input data')
-parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data')
-parser.add_argument('--cuda', action='store_true', help='use GPU computation')
-parser.add_argument('--n_cpu', type=int, default=8, help='number of cpu threads to use during batch generation')
+parser.add_argument('--epoch', type=int, default=0, help='starting epoch, default=0')
+parser.add_argument('--n_epochs', type=int, default=200, help='number of epochs of training, default=200')
+parser.add_argument('--batchSize', type=int, default=6, help='size of the batches, default=6')
+parser.add_argument('--dataroot', type=str, default='datasets/claire/', help='root directory of the dataset, default=datasets/claire')
+parser.add_argument('--lr', type=float, default=0.0002, help='initial learning rate, default=0.0002')
+parser.add_argument('--decay_epoch', type=int, default=100, help='epoch to start linearly decaying the learning rate to 0, default=100')
+parser.add_argument('--size', type=int, default=128, help='size of the data crop (squared assumed), default=128')
+parser.add_argument('--input_nc', type=int, default=3, help='number of channels of input data, default=3')
+parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data, default=3')
+parser.add_argument('--cuda', action='store_true', help='use GPU computation, default=store_true')
+parser.add_argument('--n_cpu', type=int, default=8, help='number of cpu threads to use during batch generation, default=8')
+
+# MODIFY START
+# parser.add_argument('--hasNet', type=bool, default='False', help='If there is already network to train')
+# parser.add_argument('--generator_A2B', type=str, default='output/399_netG_A2B.pth', help='A2B generator checkpoint file, default=output/399_netG_A2B.pth')
+# parser.add_argument('--generator_B2A', type=str, default='output/399_netG_B2A.pth', help='B2A generator checkpoint file, default=output/399_netG_B2A.pth')
+# parser.add_argument('--netD_A', type=str, default='output/399_netD_A.pth', help='A Discriminator checkpoint file, default=output/399_netD_A.pth')
+# parser.add_argument('--netD_B', type=str, default='output/399_netD_B.pth', help='B Discriminator checkpoint file, default=output/399_netD_B.pth')
+# MODIFY END
 opt = parser.parse_args()
 print(opt)
 
@@ -45,6 +53,29 @@ netG_A2B = Generator(opt.input_nc, opt.output_nc)
 netG_B2A = Generator(opt.output_nc, opt.input_nc)
 netD_A = Discriminator(opt.input_nc)
 netD_B = Discriminator(opt.output_nc)
+
+# MODIFY START
+# Load state dicts
+# if opt.hasNet: ## TODO, bug fix
+#     print("hasNET!!")
+#     if opt.cuda:
+#         netG_A2B.cuda() #netG_A2B.to(torch.device('cuda')) new
+#         netG_B2A.cuda() #netG_B2A.to(torch.device('cuda'))
+#         netG_A2B.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.generator_A2B).items()})
+#         netG_B2A.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.generator_B2A).items()})
+#         netD_A.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.netD_A).items()})
+#         netD_B.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.netD_B).items()})
+        
+#     else:
+#         netG_A2B.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.generator_A2B, map_location=torch.device('cpu')).items()})
+#         netG_B2A.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.generator_B2A, map_location=torch.device('cpu')).items()})
+#         netD_A.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.netD_A, map_location=torch.device('cpu')).items()})
+#         netD_B.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.netD_B, map_location=torch.device('cpu')).items()})
+#     netG_A2B.eval()
+#     netG_B2A.eval()
+#     netD_A.eval()
+#     netD_B.eval()
+# MODIFY END
 
 if opt.cuda:
     #netG_A2B.cuda()
@@ -99,22 +130,24 @@ fake_B_buffer = ReplayBuffer()
 transforms_ = [ transforms.Resize(int(opt.size*1.12), Resampling.BICUBIC), 
                 transforms.RandomCrop(opt.size), 
                 transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),  # 归一化到[0, 1] 维度转换, 例如[128, 128, 1] --> [1, 128, 128]
-                transforms.Normalize((0.5,), (0.5,)) ] # 将[0, 1]归一化到[-1, 1]  mean, std
+                transforms.ToTensor(),  # 歸一化到[0, 1] 維度轉换, 例如[128, 128, 1] --> [1, 128, 128]
+                transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ] # FIX 將[0, 1]歸一化到[-1, 1]  mean, std
 dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, unaligned=True),
                         batch_size=opt.batchSize, shuffle=True, num_workers=opt.n_cpu)
 
 # Loss plot
 logger = Logger(opt.n_epochs, len(dataloader))
 ###################################
-
 ###### Training ######
 for epoch in range(opt.epoch, opt.n_epochs):
-    for i, batch in enumerate(dataloader):
+    for i, batch in enumerate(dataloader):  
         # Set model input
+        if(input_B.shape != batch['B'].shape or input_A.shape != batch['A'].shape):
+            continue
         real_A = input_A.copy_(batch['A'])
         real_B = input_B.copy_(batch['B'])
-
+        # print(real_A.shape)
+        # print(real_B.shape)
         ###### Generators A2B and B2A ######
         optimizer_G.zero_grad()
 
@@ -129,19 +162,21 @@ for epoch in range(opt.epoch, opt.n_epochs):
         # GAN loss
         fake_B = netG_A2B(real_A)
         pred_fake = netD_B(fake_B)
-        loss_GAN_A2B = criterion_GAN(pred_fake, target_real) # generator让pred_fake接近1
+        loss_GAN_A2B = criterion_GAN(pred_fake, target_real) # generator讓pred_fake接近1
 
+        # print("1")
         fake_A = netG_B2A(real_B)
         pred_fake = netD_A(fake_A)
         loss_GAN_B2A = criterion_GAN(pred_fake, target_real)
 
+        # print("2")
         # Cycle loss
         recovered_A = netG_B2A(fake_B)
         loss_cycle_ABA = criterion_cycle(recovered_A, real_A)*10.0
 
         recovered_B = netG_A2B(fake_A)
         loss_cycle_BAB = criterion_cycle(recovered_B, real_B)*10.0
-
+        # print("3")
         # Total loss
         loss_G = loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
         #loss_G = loss_identity_A + loss_identity_B + loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
@@ -164,7 +199,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
 
         # Fake loss
         fake_A = fake_A_buffer.push_and_pop(fake_A)
-        pred_fake = netD_A(fake_A.detach()) # fake_A 由 G 生成, detach 使更新不影响G
+        pred_fake = netD_A(fake_A.detach()) # fake_A 由 G 生成, detach 使更新不影響G
         loss_D_fake = criterion_GAN(pred_fake, target_fake)
 
         # Total loss
@@ -207,7 +242,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
     lr_scheduler_D_B.step()
 
     # Save models checkpoints
-    if epoch % 20 == 19:
+    if epoch % 100 == 99 or epoch == (opt.n_epochs) - 1:
 
         torch.save(netG_A2B.state_dict(), 'output/{}_netG_A2B.pth'.format(epoch))
         torch.save(netG_B2A.state_dict(), 'output/{}_netG_B2A.pth'.format(epoch))

@@ -5,7 +5,7 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
 
-        conv_block = [  nn.ReflectionPad2d(1), # N, C, H, W  H, W 上下左右各填充1个像素
+        conv_block = [  nn.ReflectionPad2d(1), # N, C, H, W  H, W 上下左右各填充1個像素
                         nn.Conv2d(in_features, in_features, 3),
                         nn.InstanceNorm2d(in_features),
                         nn.ReLU(inplace=True),

@@ -15,7 +15,7 @@ from datasets import ImageDataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--batchSize', type=int, default=1, help='size of the batches')
-parser.add_argument('--dataroot', type=str, default='datasets/horse2zebra/', help='root directory of the dataset')
+parser.add_argument('--dataroot', type=str, default='datasets/claire/', help='root directory of the dataset')
 parser.add_argument('--input_nc', type=int, default=3, help='number of channels of input data')
 parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data')
 parser.add_argument('--size', type=int, default=128, help='size of the data (squared assumed)')
@@ -39,7 +39,7 @@ if opt.cuda:
     netG_B2A.cuda() #netG_B2A.to(torch.device('cuda'))
 
 
-#print(torch.load(opt.generator_A2B))
+# print(torch.load(opt.generator_A2B).keys())
 
 # Load state dicts
 if opt.cuda:
