@@ -1,79 +1,82 @@
-from tkinter import *
-from tkinter import PhotoImage
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import tkinter as tk
+from random import seed
+from random import gauss
+import random
 import subprocess
 import os
 import math
+import pywebio
+seed(44)
+# PATH = "C:\\Users\Hairy\Desktop\ML"
+base = "/mnt/c/home/hchiang/test/Handwritten-CycleGAN"
+input_text_path = 'buffer/input.txt'
+fonts = "buffer/kaiu.ttf"
+text_img_pathsave = "datasets/predict/test/A/"
+hwr_img_pathsave = "output/A"
+log_buffer = "buffer/log.log"
 
-PATH = "C:\\Users\Hairy\Desktop\ML"
-filepath = os.path.join(PATH, "text.txt")
-root = tk.Tk()
-root.geometry("1000x700")
-root.title("ML Team10 DEMO")
 article_len = 0
+punctuation = {}
 def init():
     global article_len
-    subprocess.run(["wsl", "rm", "-rf", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/B/"])
-    subprocess.run(["wsl", "rm", "-rf", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/A/"])
-    subprocess.run(["wsl", "rm", "-rf", "/mnt/c/Users/Hairy/Desktop/ML/output/A/*"])
-    subprocess.run(["wsl", "mkdir", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/B/"])
-    subprocess.run(["wsl", "mkdir", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/A/"])
+    subprocess.run(["rm", "-rf", f"{text_img_pathsave}"])
+    subprocess.run(["rm", "-rf", f"{hwr_img_pathsave}"])
+    subprocess.run(["mkdir", f"{hwr_img_pathsave}"])
+    subprocess.run(["mkdir", f"{text_img_pathsave}"])
     article_len = 0
+    getWord()
 
 def show_result():
-    window = tk.Toplevel()
-    window.title("Handwritten Result")
-    window.geometry("832x500")
-
-    main_frame = Frame(window)
-    main_frame.pack(fill=BOTH, expand=1)
-
-    canvas = Canvas(main_frame)
-    canvas.pack(side=LEFT, fill=BOTH, expand=1)
-
-    scrollbar = Scrollbar(window, orient=VERTICAL, command=canvas.yview)
-    scrollbar.pack(side=RIGHT, fill=Y)
-    canvas.configure(yscrollcommand=scrollbar.set)
-    canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion= canvas.bbox("all")))
-    img = Image.open("result.png")
-    photo = ImageTk.PhotoImage(img)
-    
-    second_frame = Frame(canvas)
-    label_img = Label(second_frame, image=photo)
-    label_img.pack()
-    canvas.create_window((0, 0), window=second_frame, anchor="nw")
-    window.mainloop()
-
+    img = open('result.png', 'rb').read()  
+    pywebio.output.put_image(img) 
 def create_img():
-    input.delete(1.0, END)
-
+    global article_len
     images = []
     for i in range(article_len-1):
         tmp = Image.open("output/A/{:04d}.png".format(i))
         images.append(tmp.resize((64, 64)))
     max_width = 832
+    img_width = 64
     img_height = 64
-    col = max_width // article_len
+    
+    col = max_width // img_width
+    col = 15        # FIX
     row = math.ceil(article_len / float(col))
-    print(row)
     result = Image.new("RGB", (max_width, row*64), (255,255,255))
     x = 0
-    y = 0
+    y = 0       
+    i = 0
     for image in images:
-        if x + image.width > max_width:
+        (l, t, r, b) = (3+random.randint(1,10), 0, 61-random.randint(1,10), 64)
+        if i not in punctuation:
+            (l, t, r, b) = (3+random.randint(1,10), 0, 61-random.randint(1,10), 64)
+        elif punctuation[i] == ['\n']:
+            print("new line")
+            y += img_height
+            x = 0
+        else:
+            (l, t, r, b) = (4, 4, 4, 4)            
+        box = (l, t, r, b)
+        image = image.crop(box)
+        im = Image.new("RGB", (random.randint(50, 60), 64), (255,255,255))
+        im.paste(image, (random.randint(0,5), random.randint(0,5)))
+        # im.save("{:04d}.png".format(i))
+        if x + im.width > max_width:
             x = 0
             y += img_height
-        result.paste(image, (x, y))
-        x += image.width   
-        print(result.size) 
+        
+        result.paste(im, (x, y))
+        i += 1
+        x += im.width   
+        
     result.save("result.png")
     show_result()
 
 
 def generate_handwritten():
-    subprocess.run(["wsl", "cp", "-rf", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/B/*", "/mnt/c/Users/Hairy/Desktop/ML/datasets/predict/test/A"])
-    subprocess.run(["wsl", "python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", "199_netG_B2A.pth"])
+    # subprocess.run(["cp", "-f", f"{base}/datasets/predict/test/B/*", f"{base}/datasets/predict/test/A"])
+    subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", "output/199_netG_B2A.pth"])
     create_img()
 
 def generate_text_image():
@@ -82,10 +85,7 @@ def generate_text_image():
     s = 100
     shift = 14
 
-    fonts = f"{PATH}/kaiu.ttf"
-    pathSave = f"{PATH}/datasets/predict/test/B/"
-
-    with open(filepath, "r") as f:
+    with open(input_text_path, "r") as f:
         user_input = f.read()
     for i, ch in enumerate(user_input):
         article_len += 1
@@ -96,24 +96,23 @@ def generate_text_image():
 
         draw.text((shift, shift), ch, fill=(0, 0, 0), font=font)
 
-        image.save(pathSave + "{:04n}".format(i) +".png")
+        image.save(text_img_pathsave + "{:04n}".format(i) +".png")
     generate_handwritten()
 
-def save_text():
-    init()
-    text = input.get(1.0, END)
-    with open(filepath, "w") as f:
-        f.write(text)
+def getWord():
+    # init()
+    arcle = pywebio.input.textarea('想要轉換的文章', rows=6)
+    # pywebio.input.actions('actions', [
+    #     {'label': 'Run', 'value': 'save'},
+    #     {'label': 'Reset', 'type': 'reset', 'color': 'warning'}
+    # ], help_text='actions')
+    # runCode()
+    pywebio.output.put_text(arcle)
+    with open(input_text_path, 'w') as f:
+        f.write(arcle)
     generate_text_image()
+    pywebio.output.put_button("重新製作", onclick=lambda: init(), color='success', outline=True)
+    
 
-# text box
-input = Text(root, width=80, height=30, font=("kaiu", 16))
-input.pack(pady= 10)
-
-# button 
-button_frame = Frame(root)
-button_frame.pack()
-submit_button = Button(button_frame, text="Submit", command=save_text)
-submit_button.grid(row=0, column=1, padx=20)
-
-root.mainloop()
+if __name__ == '__main__':
+    pywebio.platform.tornado.start_server(init, port=8080, log_file="buffer/log.log", auto_reload=True)

@@ -3,6 +3,7 @@
 import argparse
 import sys
 import os
+import random
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -60,7 +61,7 @@ input_B = Tensor(opt.batchSize, opt.output_nc, opt.size, opt.size)
 
 # Dataset loader
 transforms_ = [ transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,)) ]
+                transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
 dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, mode='test'), 
                         batch_size=opt.batchSize, shuffle=False, num_workers=opt.n_cpu)
 ###################################
@@ -82,12 +83,15 @@ for i, batch in enumerate(dataloader):
     # fake_B = 0.5*(netG_A2B(real_A).data + 1.0)
     # fake_A = 0.5*(netG_B2A(real_B).data + 1.0)
     fake_A = 0.5*(netG_A2B(real_A).data + 1.0)
+    # fake_A = fake_A.mean(dim=1, keepdim=True)
+    # fake_A = fake_A.repeat(1, 3, 1, 1)
+    # fake_A = 0.5*(netG_A2B(real_A).data + random.uniform(-1, 1))
+
 
     # Save image files
-    save_image(fake_A, 'output/A/%04d.png' % (i+1))
+    save_image(fake_A, 'output/A/%04d.png' % (i))
     # save_image(fake_B, 'output/B/%04d.png' % (i+1))
 
     sys.stdout.write('\rGenerated images %04d of %04d' % (i+1, len(dataloader)))
-
 sys.stdout.write('\n')
 ###################################

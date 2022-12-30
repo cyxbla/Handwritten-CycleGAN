@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch 
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
@@ -18,15 +19,38 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         return x + self.conv_block(x)
 
+# MODIFIED START
+class GaussianNoiseLayer(nn.Module):
+    def __init__(self, mean=0, std=1):
+        super(GaussianNoiseLayer, self).__init__()
+        self.mean = mean
+        self.std = std
+        
+    def forward(self, x):
+        noise = torch.randn(x.size()) * self.std + self.mean
+        # print(x.device, noise.device)
+        if x.device != noise.device:
+            noise = noise.to(x.device)
+            # x = x.to(noise.device)
+        # print(x.device, noise.device)
+
+        return x + noise
+# MODIFIED END
+
 class Generator(nn.Module):
     def __init__(self, input_nc, output_nc, n_residual_blocks=6):
         super(Generator, self).__init__()
-
+        
         # Initial convolution block       
         model = [   nn.ReflectionPad2d(3),
                     nn.Conv2d(input_nc, 64, 7),
                     nn.InstanceNorm2d(64),
                     nn.ReLU(inplace=True) ]
+
+        ## MODIFIED START
+        # self.gaussian_noise = GaussianNoiseLayer(mean=0, std=0.1)
+        # model.append(self.gaussian_noise)
+        ## MODIFIED END
 
         # Downsampling
         in_features = 64
