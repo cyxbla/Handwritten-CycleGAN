@@ -118,4 +118,4 @@ def getWord():
     
 
 if __name__ == '__main__':
-    pywebio.platform.tornado.start_server(init, port=8080, log_file="buffer/log.log", auto_reload=True)
+    pywebio.platform.tornado.start_server(init, port=8080, log_file="buffer/file.log", auto_reload=True)
