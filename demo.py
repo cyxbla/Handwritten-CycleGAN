@@ -1,16 +1,15 @@
 import random
 import subprocess
-import os
 import math
 import pywebio
+import time
 from pywebio.input import * 
 from pywebio.output import * 
 from pywebio.session import run_js
-from PIL import Image, ImageDraw, ImageFont, ImageTk
-# from pywebio import run_js
+from pathlib import Path
+from enum import Enum
+from PIL import Image, ImageDraw, ImageFont
 from random import seed
-from random import gauss
-
 seed(random.randint(0,99))
 
 base = "/mnt/c/home/hchiang/test/Handwritten-CycleGAN"
@@ -20,7 +19,12 @@ text_img_pathsaveA = "datasets/predict/test/A/"
 text_img_pathsaveB = "datasets/predict/test/B/"
 hwr_img_pathsave = "output/A"
 log_buffer = "buffer/log.log"
-A2Bpath = "output/199_netG_B2A.pth"
+class Paths(Enum):
+    YenXuan = Path("output/yenxuan_199_netG_A2B.pth")
+
+    YuXuan = "output/yuxuan_249_netG_A2B.pth"
+
+    XiZhi = "output/xizhi_199_netG_A2B.pth"
 
 article_len = 0
 punctuation = {}
@@ -39,7 +43,21 @@ def init():
 def show_result():
     img = open('result.png', 'rb').read()  
     pywebio.output.put_image(img) 
+    pywebio.output.put_grid([
+            [None], 
+        ], cell_width='125px', cell_height='30px') 
+    pywebio.output.put_grid([
+        [pywebio.output.put_file('result.png', img, 'download me'), 
+        pywebio.output.put_button("Reproduce", onclick=lambda: run_js('window.location.reload()'), color='success', outline=True)
+        ]
+    ], cell_width='125px', cell_height='100px')
+    # pywebio.output.put_file('result.png', img, 'download me')
 def create_img():
+    pywebio.output.put_text("create image...")
+    pywebio.output.put_processbar('create_img')
+    for i in range(1, 11):
+        pywebio.output.set_processbar('create_img', i / 10)
+        time.sleep(0.1)
     global article_len
     images = []
     for i in range(article_len):
@@ -87,11 +105,21 @@ def create_img():
 
 
 def generate_handwritten():
+    pywebio.output.put_text("generate handwritten...")
+    pywebio.output.put_processbar('generate_handwritten')
+    for i in range(1, 11):
+        pywebio.output.set_processbar('generate_handwritten', i / 10)
+        time.sleep(0.1)
     subprocess.run(["cp", "-rf", f"{text_img_pathsaveA}", f"{text_img_pathsaveB}"])
-    subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", f"{A2Bpath}"])
+    subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", f"{Paths[selected].value}"])
     create_img()
 
 def generate_text_image():
+    pywebio.output.put_text("generate text image...")
+    pywebio.output.put_processbar('generate_text_image')
+    for i in range(1, 11):
+        pywebio.output.set_processbar('generate_text_image', i / 10)
+        time.sleep(0.1)
     global article_len, newline
     pix = 128
     s = 100
@@ -117,12 +145,16 @@ def generate_text_image():
     generate_handwritten()
 
 def getWord():
-    arcle = pywebio.input.textarea('想要轉換的文章', rows=6)
+    global selected
+    arcle = pywebio.input.textarea('Article to Transfer', rows=6)
     pywebio.output.put_text(arcle)
+    selected = pywebio.input.select("Select Fonts:", ["YenXuan", "YuXuan", "XiZhi"])
     with open(input_text_path, 'w') as f:
-        f.write(arcle)
+        f.write(arcle)   
+    
+    print(selected)
     generate_text_image()
-    pywebio.output.put_button("重新製作", onclick=lambda: run_js('window.location.reload()'), color='success', outline=True)
-
+    # pywebio.output.put_button("Reproduce", onclick=lambda: run_js('window.location.reload()'), color='success', outline=True)
 if __name__ == '__main__':
+    pywebio.config(title="MLFianl Team 10 Demo")
     pywebio.platform.tornado.start_server(init, port=8080, log_file="buffer/file.log", debug=True)
