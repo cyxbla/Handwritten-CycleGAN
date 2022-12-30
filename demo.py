@@ -12,7 +12,8 @@ seed(44)
 base = "/mnt/c/home/hchiang/test/Handwritten-CycleGAN"
 input_text_path = 'buffer/input.txt'
 fonts = "buffer/kaiu.ttf"
-text_img_pathsave = "datasets/predict/test/A/"
+text_img_pathsaveA = "datasets/predict/test/A/"
+text_img_pathsaveB = "datasets/predict/test/B/"
 hwr_img_pathsave = "output/A"
 log_buffer = "buffer/log.log"
 
@@ -20,10 +21,12 @@ article_len = 0
 punctuation = {}
 def init():
     global article_len
-    subprocess.run(["rm", "-rf", f"{text_img_pathsave}"])
+    subprocess.run(["rm", "-rf", f"{text_img_pathsaveA}"])
+    subprocess.run(["rm", "-rf", f"{text_img_pathsaveB}"])
     subprocess.run(["rm", "-rf", f"{hwr_img_pathsave}"])
+    subprocess.run(["mkdir", f"{text_img_pathsaveA}"])
+    # subprocess.run(["mkdir", f"{text_img_pathsaveB}"])
     subprocess.run(["mkdir", f"{hwr_img_pathsave}"])
-    subprocess.run(["mkdir", f"{text_img_pathsave}"])
     article_len = 0
     getWord()
 
@@ -75,7 +78,7 @@ def create_img():
 
 
 def generate_handwritten():
-    # subprocess.run(["cp", "-f", f"{base}/datasets/predict/test/B/*", f"{base}/datasets/predict/test/A"])
+    subprocess.run(["cp", "-rf", f"{text_img_pathsaveA}", f"{text_img_pathsaveB}"])
     subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", "output/199_netG_B2A.pth"])
     create_img()
 
@@ -96,7 +99,7 @@ def generate_text_image():
 
         draw.text((shift, shift), ch, fill=(0, 0, 0), font=font)
 
-        image.save(text_img_pathsave + "{:04n}".format(i) +".png")
+        image.save(text_img_pathsaveA + "{:04n}".format(i) +".png")
     generate_handwritten()
 
 def getWord():
