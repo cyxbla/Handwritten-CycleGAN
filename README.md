@@ -1,15 +1,15 @@
 # Generating handwritten Chinese characters using CycleGAN
 
 We use CycleGAN to generate handwritten Chinese characters.
+## How to Use
+```
+pip3 install pywebio
+python3 demo.py
+```
+Then you can connect to the given URL to change text to your own handwritten. (Need to have the model path first)
 
-## LANTING
-![](./datasets/lantingkai/train/A/0059.jpg)
-![](./outputlanting/B/0059.png)
-
-## BAOTA
-
-![](./output/B/0059.png)
-
+## Self Handwritten from an Article
+![](result.png)
 
 # Pytorch-CycleGAN
 A clean and readable Pytorch implementation of CycleGAN (https://arxiv.org/abs/1703.10593)
@@ -29,23 +29,18 @@ pip3 install visdom
 ## Training
 
 ### 1. Setup the dataset
-First, you will need to download and setup a dataset. The easiest way is to use one of the already existing datasets on UC Berkeley's repository:
-```
-./download_dataset <dataset_name>
-```
-Valid <dataset_name> are: apple2orange, summer2winter_yosemite, horse2zebra, monet2photo, cezanne2photo, ukiyoe2photo, vangogh2photo, maps, cityscapes, facades, iphone2dslr_flower, ae_photos
-
-Alternatively you can build your own dataset by setting up the following directory structure:
+First, you will need to prepare your text image and handwritten image. Or you can unzip the datasets.zip in ./datasets.
+Build your own dataset by setting up the following directory structure:
 
     .
     ├── datasets                   
-    |   ├── <dataset_name>         # i.e. brucewayne2batman
+    |   ├── <dataset_name>         # i.e. text2handwritten
     |   |   ├── train              # Training
-    |   |   |   ├── A              # Contains domain A images (i.e. Bruce Wayne)
-    |   |   |   └── B              # Contains domain B images (i.e. Batman)
+    |   |   |   ├── A              # Contains domain A images (i.e. real text)
+    |   |   |   └── B              # Contains domain B images (i.e. self handwritten)
     |   |   └── test               # Testing
-    |   |   |   ├── A              # Contains domain A images (i.e. Bruce Wayne)
-    |   |   |   └── B              # Contains domain B images (i.e. Batman)
+    |   |   |   ├── A              # Contains domain A images (i.e. real text)
+    |   |   |   └── B              # Contains domain B images (i.e. self handwritten)
     
 ### 2. Train!
 If you don't own a GPU remove the --cuda option, although I advise you to get one!
@@ -59,11 +54,7 @@ train.py
         netD_B = nn.DataParallel(netD_B, device_ids=[0])
 ```
 ```python
-python3 train.py --cuda --dataroot datasets/lantingkai/ --input_nc 1 --output_nc 1
-```
-
-```python
-python3 train.py --cuda --dataroot datasets/baotakai/ --input_nc 1 --output_nc 1
+python3 train.py --cuda --dataroot datasets/claire2_128/ --input_nc 1 --output_nc 1
 ```
 
 ```
@@ -73,7 +64,7 @@ This command will start a training session using the images under the *dataroot/
 
 Both generators and discriminators weights will be saved under the output directory.
 
-You can also view the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
+If you meet connection problems, you can try start visdom.server. View the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
 
 <img Generator Loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png" width="300" height="300"> <img Discriminator loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png" width="300" height="300">
 <img Generator GAN loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png" width="300" height="300">
@@ -83,22 +74,17 @@ You can also view the training progress as well as live output images by running
 
 ## Test
 ```python
-python3 test.py --dataroot datasets/lantingkai/ --cuda --input_nc 1 --output_nc 1
+python3 test.py --dataroot datasets/test/ --cuda --input_nc 1 --output_nc 1
 ```
-
-```python
-python3 test.py --dataroot datasets/baotakai/ --cuda --input_nc 1 --output_nc 1
-```
-
 ```
 ./test.py --dataroot datasets/<dataset_name>/ --cuda
 ```
 This command will take the images under the *dataroot/test* directory, run them through the generators and save the output under the *output/A* and *output/B* directories. As with train, some parameters like the weights to load, can be tweaked, see ```./test.py --help``` for more information.
 
-Examples of the generated outputs (default params, horse2zebra dataset):
+Examples of the generated outputs (real text, fake handwritten):
 
-<img Real horse src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_A.jpg" width="200" height="200"> <img Fake zebra src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_B.png" height="200" width="200"><br>
-<img Real zebra src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/real_B.jpg" height="200" width="200"><img Fake horse src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/fake_A.png" height="200" width="200">
+<img real text src="datasets/predict/test/A/0038.png" width="200" height="200"> 
+<img fake handwritten src="output/A/0038.png" height="200" width="200">
 
 ## License
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
