@@ -22,7 +22,7 @@ log_buffer = "buffer/log.log"
 class Paths(Enum):
     YenXuan = Path("output/yenxuan_199_netG_A2B.pth")
 
-    YuXuan = "output/yuxuan_249_netG_A2B.pth"
+    YuXuan = "output/yuxuan_299_netG_A2B.pth"
 
     XiZhi = "output/xizhi_199_netG_A2B.pth"
 
@@ -45,13 +45,13 @@ def show_result():
     pywebio.output.put_image(img) 
     pywebio.output.put_grid([
             [None], 
-        ], cell_width='125px', cell_height='30px') 
+        ], cell_width='125px', cell_height='30px') ## padding
+    
     pywebio.output.put_grid([
-        [pywebio.output.put_file('result.png', img, 'download me'), 
-        pywebio.output.put_button("Reproduce", onclick=lambda: run_js('window.location.reload()'), color='success', outline=True)
-        ]
+        [pywebio.output.put_button("Download", onclick=lambda: pywebio.session.download('result.png', img), color='success', outline=True), 
+        pywebio.output.put_button("Reproduce", onclick=lambda: run_js('window.location.reload()'), color='success', outline=True)],
     ], cell_width='125px', cell_height='100px')
-    # pywebio.output.put_file('result.png', img, 'download me')
+
 def create_img():
     pywebio.output.put_text("create image...")
     pywebio.output.put_processbar('create_img')
@@ -106,12 +106,12 @@ def create_img():
 
 def generate_handwritten():
     pywebio.output.put_text("generate handwritten...")
+    subprocess.run(["cp", "-rf", f"{text_img_pathsaveA}", f"{text_img_pathsaveB}"])
+    subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", f"{Paths[selected].value}"])
     pywebio.output.put_processbar('generate_handwritten')
     for i in range(1, 11):
         pywebio.output.set_processbar('generate_handwritten', i / 10)
         time.sleep(0.1)
-    subprocess.run(["cp", "-rf", f"{text_img_pathsaveA}", f"{text_img_pathsaveB}"])
-    subprocess.run(["python3", "predict.py", "--cuda", "--dataroot", "datasets/predict", "--generator_A2B", f"{Paths[selected].value}"])
     create_img()
 
 def generate_text_image():
@@ -146,7 +146,7 @@ def generate_text_image():
 
 def getWord():
     global selected
-    arcle = pywebio.input.textarea('Article to Transfer', rows=6)
+    arcle = pywebio.input.textarea('Auto Memory Dolls', rows=6, maxlength=500, minlength=1)
     pywebio.output.put_text(arcle)
     selected = pywebio.input.select("Select Fonts:", ["YenXuan", "YuXuan", "XiZhi"])
     with open(input_text_path, 'w') as f:

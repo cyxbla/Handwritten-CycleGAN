@@ -10,9 +10,11 @@ class ImageDataset(Dataset):
     def __init__(self, root, transforms_=None, unaligned=False, mode='train'):
         self.transform = transforms.Compose(transforms_)
         self.unaligned = unaligned
-
-        self.files_A = sorted(glob.glob(os.path.join(root, '%s/A' % mode) + '/*.*'))
-        self.files_B = sorted(glob.glob(os.path.join(root, '%s/B' % mode) + '/*.*'))
+        if mode == 'predict':
+            self.files_A = sorted(glob.glob(os.path.join(root, '%s/A' % mode) + '/*.*'))
+        else:
+            self.files_A = sorted(glob.glob(os.path.join(root, '%s/A' % mode) + '/*.*'))
+            self.files_B = sorted(glob.glob(os.path.join(root, '%s/B' % mode) + '/*.*'))
 
     def __getitem__(self, index):
         item_A = self.transform(Image.open(self.files_A[index % len(self.files_A)]))

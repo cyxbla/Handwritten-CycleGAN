@@ -62,7 +62,7 @@ input_A = Tensor(opt.batchSize, opt.input_nc, opt.size, opt.size)
 # Dataset loader
 transforms_ = [ transforms.ToTensor(),
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
-dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, mode='test'), 
+dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, mode='predict'), 
                         batch_size=opt.batchSize, shuffle=False, num_workers=opt.n_cpu)
 ###################################
 
