@@ -6,10 +6,34 @@ We use CycleGAN to generate handwritten Chinese characters.
 pip3 install pywebio
 python3 demo.py
 ```
-Then you can connect to the given URL to change text to your own handwritten. (Need to have the model path first)
+Then you can open [http://127.0.0.1:8080/](http://127.0.0.1:8080/) in your web browser to transform text to your own handwritten. (Need to set the model path first)
+```py 
+demo.py
+    line 22 - 25:
+    class Paths(Enum):
+        YenXuan = Path("output/yenxuan_199_netG_A2B.pth")
+
+        YuXuan = Path("output/yuxuan_299_netG_A2B.pth")
+
+    line 150:
+    selected = pywebio.input.select("Select Fonts:", ["YenXuan", "YuXuan"])
+```
 
 ## Self Handwritten from an Article
-![](result.png)
+![](show/show.png)
+
+# Data Preprocessing
+## Prerequisites
+```
+sudo apt-get install poppler-utils
+pip install pdf2image
+```
+In ```buffer/article_text``` and ```buffer/article_pdf```, prepare your labeling article(.txt) and own handwritten(.pdf) in the directory, respectively.
+## Start Generate Train dataset
+Change arguments to create directory and test datasets.
+```
+python3 dataPreprocess.py --dirName test --test 1
+```
 
 # Pytorch-CycleGAN
 A clean and readable Pytorch implementation of CycleGAN (https://arxiv.org/abs/1703.10593)
@@ -66,10 +90,9 @@ Both generators and discriminators weights will be saved under the output direct
 
 If you meet connection problems, you can try start visdom.server. View the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
 
-<img Generator Loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G.png" width="300" height="300"> <img Discriminator loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_D.png" width="300" height="300">
-<img Generator GAN loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_GAN.png" width="300" height="300">
-<img Generator identity loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_identity.png" width="300" height="300">
-<img Generator cycle loss src="https://github.com/ai-tor/PyTorch-CycleGAN/raw/master/output/loss_G_cycle.png" height="300" width="300">
+<img Generator Loss src="show/loss_G.png" width="300" height="300"> <img Discriminator loss src="show/loss_D.png" width="300" height="300">
+<img Generator GAN loss src="show/loss_G_GAN.png" width="300" height="300">
+<img Generator cycle loss src="show/loss_G_cycle.png" height="300" width="300">
 
 
 ## Test
@@ -83,8 +106,9 @@ This command will take the images under the *dataroot/test* directory, run them 
 
 Examples of the generated outputs (real text, fake handwritten):
 
-<img real text src="datasets/predict/test/A/0038.png" width="200" height="200"> 
-<img fake handwritten src="output/A/0038.png" height="200" width="200">
+<img real text src="show/text.png" width="100" height="100"> 
+real handwritten<img real handwritten src="show/realhwr.png" height="100" width="100">
+fake handwritten<img fake handwritten src="show/fakehwr.png" height="100" width="100">
 
 ## License
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details

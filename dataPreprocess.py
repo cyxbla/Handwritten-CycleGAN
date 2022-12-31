@@ -1,34 +1,39 @@
 from PIL import Image, ImageDraw, ImageFont
-from typing import OrderedDict
 from pdf2image import convert_from_path
 import os
+import argparse
+
 pix = 128
 s = 100
 shift = 14
+parser = argparse.ArgumentParser()
+parser.add_argument('--dirName', type=str, default='claire', help='root directory of the dataset')
+parser.add_argument('--test', type=int, default='0', help='has test dataset')
+opt = parser.parse_args()
+dir = opt.dirName
 
-dir = "test"
-
-trainArticleText = "buffer/article_text/yuxuan.txt"
-testArticleText = "buffer/article_text/test.txt"
-trainArticlePDF = "buffer/article_pdf/yuxuan.pdf" 
-testArticlePDF = "buffer/article_pdf/test.pdf" 
-
+trainArticleText = f"buffer/article_text/{dir}.txt"
+trainArticlePDF = f"buffer/article_pdf/{dir}.pdf" 
 trainText2ImageSave = f"datasets/{dir}/train/A"
-testText2ImageSave = f"datasets/{dir}/test/A"
 trainHwrImageSave = f"datasets/{dir}/train/B"
-testHwrImageSave = f"datasets/{dir}/test/B"
 
 fonts = 'buffer/fonts/kaiu.ttf'
 pdfPage = "buffer/pages"
 
 if not os.path.exists(f'{trainText2ImageSave}'):
     os.makedirs(f'{trainText2ImageSave}')
-if not os.path.exists(f'{testText2ImageSave}'):
-    os.makedirs(f'{testText2ImageSave}')
 if not os.path.exists(f'{trainHwrImageSave}'):
     os.makedirs(f'{trainHwrImageSave}')
-if not os.path.exists(f'{testHwrImageSave}'):
-    os.makedirs(f'{testHwrImageSave}')
+if opt.test == 1:
+    testArticleText = "buffer/article_text/test.txt"
+    testArticlePDF = "buffer/article_pdf/test.pdf" 
+    testText2ImageSave = f"datasets/{dir}/test/A"
+    testHwrImageSave = f"datasets/{dir}/test/B"
+
+    if not os.path.exists(f'{testText2ImageSave}'):
+        os.makedirs(f'{testText2ImageSave}')
+    if not os.path.exists(f'{testHwrImageSave}'):
+        os.makedirs(f'{testHwrImageSave}')
 
 def text2image_train():
     global trainArticleText, trainText2ImageSave
@@ -169,5 +174,6 @@ def splitHwrImage_test():
 if __name__ == '__main__':
     text2image_train()
     splitHwrImage_train()
-    # text2image_test()
-    # splitHwrImage_test()
+    if opt.test == 1:
+        text2image_test()
+        splitHwrImage_test()
