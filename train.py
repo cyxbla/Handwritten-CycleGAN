@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import argparse
 import itertools
 
@@ -19,6 +17,7 @@ from utils import Logger
 from utils import weights_init_normal
 from datasets import ImageDataset
 
+
 # torch.autograd.set_detect_anomaly(True)
 
 parser = argparse.ArgumentParser()
@@ -34,13 +33,6 @@ parser.add_argument('--output_nc', type=int, default=3, help='number of channels
 parser.add_argument('--cuda', action='store_true', help='use GPU computation, default=store_true')
 parser.add_argument('--n_cpu', type=int, default=8, help='number of cpu threads to use during batch generation, default=8')
 
-# MODIFY START
-# parser.add_argument('--hasNet', type=bool, default='False', help='If there is already network to train')
-# parser.add_argument('--generator_A2B', type=str, default='output/399_netG_A2B.pth', help='A2B generator checkpoint file, default=output/399_netG_A2B.pth')
-# parser.add_argument('--generator_B2A', type=str, default='output/399_netG_B2A.pth', help='B2A generator checkpoint file, default=output/399_netG_B2A.pth')
-# parser.add_argument('--netD_A', type=str, default='output/399_netD_A.pth', help='A Discriminator checkpoint file, default=output/399_netD_A.pth')
-# parser.add_argument('--netD_B', type=str, default='output/399_netD_B.pth', help='B Discriminator checkpoint file, default=output/399_netD_B.pth')
-# MODIFY END
 opt = parser.parse_args()
 print(opt)
 
@@ -54,28 +46,6 @@ netG_B2A = Generator(opt.output_nc, opt.input_nc)
 netD_A = Discriminator(opt.input_nc)
 netD_B = Discriminator(opt.output_nc)
 
-# MODIFY START
-# Load state dicts
-# if opt.hasNet: ## TODO, bug fix
-#     print("hasNET!!")
-#     if opt.cuda:
-#         netG_A2B.cuda() #netG_A2B.to(torch.device('cuda')) new
-#         netG_B2A.cuda() #netG_B2A.to(torch.device('cuda'))
-#         netG_A2B.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.generator_A2B).items()})
-#         netG_B2A.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.generator_B2A).items()})
-#         netD_A.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.netD_A).items()})
-#         netD_B.load_state_dict({k.replace('module.',''):v for k,v in torch.load(opt.netD_B).items()})
-        
-#     else:
-#         netG_A2B.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.generator_A2B, map_location=torch.device('cpu')).items()})
-#         netG_B2A.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.generator_B2A, map_location=torch.device('cpu')).items()})
-#         netD_A.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.netD_A, map_location=torch.device('cpu')).items()})
-#         netD_B.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(opt.netD_B, map_location=torch.device('cpu')).items()})
-#     netG_A2B.eval()
-#     netG_B2A.eval()
-#     netD_A.eval()
-#     netD_B.eval()
-# MODIFY END
 
 if opt.cuda:
     #netG_A2B.cuda()
@@ -129,7 +99,7 @@ fake_B_buffer = ReplayBuffer()
 # Dataset loader
 transforms_ = [ transforms.Resize(int(opt.size*1.12), Resampling.BICUBIC), 
                 transforms.RandomCrop(opt.size), 
-                # transforms.RandomHorizontalFlip(),
+                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),  # 歸一化到[0, 1] 維度轉换, 例如[128, 128, 1] --> [1, 128, 128]
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ] # FIX 將[0, 1]歸一化到[-1, 1]  mean, std
 dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, unaligned=True),
@@ -141,12 +111,11 @@ logger = Logger(opt.n_epochs, len(dataloader))
 for epoch in range(opt.epoch, opt.n_epochs):
     for i, batch in enumerate(dataloader):  
         # Set model input
-        if(input_B.shape != batch['B'].shape or input_A.shape != batch['A'].shape):
-            continue
+        # if(input_B.shape != batch['B'].shape or input_A.shape != batch['A'].shape):
+        #     continue
         real_A = input_A.copy_(batch['A'])
         real_B = input_B.copy_(batch['B'])
-        # print(real_A.shape)
-        # print(real_B.shape)
+
         ###### Generators A2B and B2A ######
         optimizer_G.zero_grad()
 
@@ -163,19 +132,16 @@ for epoch in range(opt.epoch, opt.n_epochs):
         pred_fake = netD_B(fake_B)
         loss_GAN_A2B = criterion_GAN(pred_fake, target_real) # generator讓pred_fake接近1
 
-        # print("1")
         fake_A = netG_B2A(real_B)
         pred_fake = netD_A(fake_A)
         loss_GAN_B2A = criterion_GAN(pred_fake, target_real)
 
-        # print("2")
         # Cycle loss
         recovered_A = netG_B2A(fake_B)
         loss_cycle_ABA = criterion_cycle(recovered_A, real_A)*10.0
 
         recovered_B = netG_A2B(fake_A)
         loss_cycle_BAB = criterion_cycle(recovered_B, real_B)*10.0
-        # print("3")
         # Total loss
         loss_G = loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
         #loss_G = loss_identity_A + loss_identity_B + loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB

@@ -47,10 +47,10 @@ class Generator(nn.Module):
                     nn.InstanceNorm2d(64),
                     nn.ReLU(inplace=True) ]
 
-        ## MODIFIED START
+        # MODIFIED START
         # self.gaussian_noise = GaussianNoiseLayer(mean=0, std=0.1)
         # model.append(self.gaussian_noise)
-        ## MODIFIED END
+        # MODIFIED END
 
         # Downsampling
         in_features = 64
@@ -83,7 +83,9 @@ class Generator(nn.Module):
         self.model = nn.Sequential(*model)
 
     def forward(self, x):
-        return self.model(x)
+        x = self.model(x)
+        # x = self.gaussian_noise(x)
+        return x
 
 class Discriminator(nn.Module):
     def __init__(self, input_nc):
