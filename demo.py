@@ -12,8 +12,8 @@ from PIL import Image, ImageDraw, ImageFont
 from random import seed
 seed(random.randint(0,99))
 
-input_text_path = 'buffer/input.txt'
-fonts = "buffer/kaiu.ttf"
+input_text_path = 'buffer/article_text/input.txt'
+fonts = "buffer/fonts/kaiu.ttf"
 text_img_pathsaveA = "datasets/predict/test/A/"
 text_img_pathsaveB = "datasets/predict/test/B/"
 hwr_img_pathsave = "output/A"

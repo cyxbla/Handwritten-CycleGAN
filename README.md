@@ -6,20 +6,9 @@ We use CycleGAN to generate handwritten Chinese characters.
 pip3 install pywebio
 python3 demo.py
 ```
-Then you can open [http://127.0.0.1:8080/](http://127.0.0.1:8080/) in your web browser to transform text to your own handwritten. (Need to set the model path first)
-```py 
-demo.py
-    line 22 - 25:
-    class Paths(Enum):
-        YenXuan = Path("output/yenxuan_199_netG_A2B.pth")
+Then you can open [http://localhost:8080/](http://localhost:8080/) in your web browser to transform text to your own handwritten. We have four different handwritten styles and paper textures.
 
-        YuXuan = Path("output/yuxuan_299_netG_A2B.pth")
-
-    line 150:
-    selected = pywebio.input.select("Select Fonts:", ["YenXuan", "YuXuan"])
-```
-
-## Self Handwritten from an Article
+## Fake Handwritten from an Random Article (桃花源記)
 ![](show/show.png)
 
 # Data Preprocessing
@@ -35,7 +24,7 @@ Change arguments to create directory and test datasets.
 python3 dataPreprocess.py --dirName test --test 1
 ```
 
-# Pytorch-CycleGAN
+# Pytorch-CycleGAN Training
 A clean and readable Pytorch implementation of CycleGAN (https://arxiv.org/abs/1703.10593)
 
 ## Prerequisites
@@ -90,9 +79,9 @@ Both generators and discriminators weights will be saved under the output direct
 
 If you meet connection problems, you can try start visdom.server. View the training progress as well as live output images by running ```python3 -m visdom``` in another terminal and opening [http://localhost:8097/](http://localhost:8097/) in your favourite web browser. This should generate training loss progress as shown below (default params, horse2zebra dataset):
 
-<img Generator Loss src="show/loss_G.png" width="300" height="300"> <img Discriminator loss src="show/loss_D.png" width="300" height="300">
+<img Generator Loss src="show/loss_G.png" width="300" height="300"> <img Discriminator loss src="show/loss_D.png" width="300" height="300"> <br>
 <img Generator GAN loss src="show/loss_G_GAN.png" width="300" height="300">
-<img Generator cycle loss src="show/loss_G_cycle.png" height="300" width="300">
+<img Generator cycle loss src="show/loss_G_Cycle.png" height="300" width="300">
 
 
 ## Test

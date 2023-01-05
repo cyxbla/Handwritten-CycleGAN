@@ -129,12 +129,11 @@ fake_B_buffer = ReplayBuffer()
 # Dataset loader
 transforms_ = [ transforms.Resize(int(opt.size*1.12), Resampling.BICUBIC), 
                 transforms.RandomCrop(opt.size), 
-                transforms.RandomHorizontalFlip(),
+                # transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),  # 歸一化到[0, 1] 維度轉换, 例如[128, 128, 1] --> [1, 128, 128]
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ] # FIX 將[0, 1]歸一化到[-1, 1]  mean, std
 dataloader = DataLoader(ImageDataset(opt.dataroot, transforms_=transforms_, unaligned=True),
                         batch_size=opt.batchSize, shuffle=True, num_workers=opt.n_cpu)
-
 # Loss plot
 logger = Logger(opt.n_epochs, len(dataloader))
 ###################################
