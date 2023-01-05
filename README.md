@@ -7,9 +7,9 @@ pip3 install pywebio
 python3 demo.py
 ```
 Then you can open [http://localhost:8080/](http://localhost:8080/) in your web browser to transform text to your own handwritten. We have four different handwritten styles and paper textures.
+<img src="show/demo.gif">
 
 ## Fake Handwritten from an Random Article (桃花源記)
-![](show/show.png)
 
 # Data Preprocessing
 ## Prerequisites
